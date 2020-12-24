@@ -1,0 +1,6 @@
+spacy
+wordcloud
+pandas
+matplotlib
+numpy
+tqdm

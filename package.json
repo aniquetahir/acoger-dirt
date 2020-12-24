@@ -9,9 +9,12 @@
   },
   "dependencies": {
     "gray-matter": "^4.0.2",
+    "html-entities": "^1.4.0",
     "lodash": "^4.17.20",
     "next": "^10.0.0",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "swr": "^0.3.11",
+    "uikit": "^3.6.5"
   }
 }

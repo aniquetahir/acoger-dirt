@@ -1,59 +1,41 @@
 import Head from "next/head";
 import styles from './layout.module.css'
-import utilStyles from '../styles/utils.module.css'
 import Link from "next/link";
+import {Component} from 'react'
+
 
 const name = 'Anique'
 export const siteTitle = 'DMML Interface for Rumor Tracking'
 
+class NavBar extends Component{
+    render(props){
+        return (
+            <div
+                uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; bottom: #transparent-sticky-navbar">
+                <nav className="uk-navbar-container" uk-navbar="" style={{'position': 'relative', 'zIndex': 980}}>
+                    <div className="uk-navbar-left">
+                        <span className="uk-navbar-item uk-logo">DMML Interface for Rumor Tracking</span>
+                        <ul className="uk-navbar-nav">
+                            <li className={this.props.home?"uk-active":""}><a href="/">Home</a></li>
+                            <li><a href="#">About</a></li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </div>
+        );
+    }
+}
+
 export default function Layout({children, home}){
     return (
-        <div className={styles.container}>
+        <div>
             <Head>
                 <link rel="icon" href="/favicon.ico" />
-                <meta
-                    name="description"
-                    content="Learn how to build a personal website using Next.js"
-                />
-                <meta
-                    property="og:image"
-                    content={`https://og-image.now.sh/${encodeURI(
-                        siteTitle
-                    )}.png?theme=light&md=0&fontSize=75px&images=https%3A%2F%2Fassets.vercel.com%2Fimage%2Fupload%2Ffront%2Fassets%2Fdesign%2Fnextjs-black-logo.svg`}
-                />
                 <meta name="og:title" content={siteTitle} />
-                <meta name="twitter:card" content="summary_large_image" />
             </Head>
-            <header className={styles.header}>
-                {home ? (
-                    <>
-                        <img
-                            src="/images/profile.jpg"
-                            className={`${styles.headerHomeImage} ${utilStyles.borderCircle}`}
-                            alt={name}
-                        />
-                        <h1 className={utilStyles.heading2Xl}>{name}</h1>
-                    </>
-                ) : (
-                    <>
-                        <Link href="/">
-                            <a>
-                                <img
-                                    src="/images/profile.jpg"
-                                    className={`${styles.headerImage} ${utilStyles.borderCircle}`}
-                                    alt={name}
-                                />
-                            </a>
-                        </Link>
-                        <h2 className={utilStyles.headingLg}>
-                            <Link href="/">
-                                <a className={utilStyles.colorInherit}>{name}</a>
-                            </Link>
-                        </h2>
-                    </>
-                )}
-            </header>
-            <main>{children}</main>
+            <NavBar home={home} />
+            <main className='uk-container uk-container-expand'>{children}</main>
             {!home && (
                 <div className={styles.backToHome}>
                     <Link href="/">
@@ -64,3 +46,4 @@ export default function Layout({children, home}){
         </div>
     )
 }
+
