@@ -3,6 +3,7 @@ import useSWR from "swr";
 import {fetcher} from "../index";
 import {AllHtmlEntities} from "html-entities";
 import {Component} from 'react';
+import _ from 'lodash';
 
 
 const hencoder = AllHtmlEntities.encode
@@ -30,7 +31,8 @@ export default class Post extends Component {
             this.state = {
                 id: this.props.postData.id,
                 content: null,
-                source: null
+                source: null,
+                ner: null
             }
         }
     }
@@ -44,9 +46,12 @@ export default class Post extends Component {
            let m_data = await fetch(`/api/getpost/${postData['id']}`);
            m_data = await m_data.json();
            this.setState(m_data);
+            // Get NER
+            fetch('/api/ner', { method: 'POST', body: m_data.content })
+                .then(r=>r.json())
+                .then(j=>this.setState({ner: j.ent}));
         }
 
-        // Get NER
 
 
     }
@@ -74,6 +79,12 @@ export default class Post extends Component {
                         <div className='uk-column-span'>
                             Entities:
                         </div>
+                        {_.isNil(this.state.ner)?(
+                            <div uk-spinner=''></div>
+                        ):(
+                            <div className='uk-column-span' dangerouslySetInnerHTML={{__html: this.state.ner}} />
+                        )}
+
                         <div className='uk-column-span'>
                             Similar:
                         </div>

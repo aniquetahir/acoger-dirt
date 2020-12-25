@@ -11,5 +11,5 @@ function get_ner(string, cb){
 export default function handler(req, res){
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    get_ner('Hello Canadian world', r=>res.end(JSON.stringify({'ent': r})));
+    get_ner(req.body, r=>res.end(JSON.stringify({'ent': r})));
 }
