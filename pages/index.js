@@ -22,7 +22,7 @@ export default function Home({allPostsData}) {
         <Head>
           <title>{siteTitle}</title>
         </Head>
-          <PostDisplay posts={useSWR('api/posts_sample', fetcher, {refreshInterval: 1000})} />
+          <PostDisplay posts={useSWR('api/posts_sample', fetcher, {refreshInterval: 10000})} />
         {/*<section className={utilStyles.headingMd}>*/}
         {/*  <p>[Your Self Introduction]</p>*/}
         {/*  <p>*/}

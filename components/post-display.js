@@ -10,7 +10,7 @@ export default function PostDisplay({posts}){
                     data['posts'].map(p=>(
                         <li>
                             <Link href={`posts/${p['id']}`}>
-                                <a>{p['content']}</a>
+                                <a>{p['source']}</a>
                             </Link>
                         </li>
                     ))

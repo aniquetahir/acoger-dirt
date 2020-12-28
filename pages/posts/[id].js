@@ -10,6 +10,47 @@ const hencoder = AllHtmlEntities.encode
 
 //import { getAllPostIds, getPostData } from '../../lib/posts'
 
+function LoadingDataView({nodata, children}){
+    return (
+        <div className='uk-column-span'>
+        {   (nodata)?(
+                <div uk-spinner='' />
+            ):(
+             <>
+                 {children}
+             </>
+            )}
+        </div>
+    );
+}
+
+function RepliesView({replies}){
+    const table = !_.isNil(replies)?(
+        <table className="uk-table uk-table-hover uk-table-divider">
+            <thead>
+            <tr>
+                <th>Reply</th>
+                <th>Sentiment</th>
+            </tr>
+            </thead>
+            <tbody>
+                {replies.map(r=>(
+                    <tr>
+                        <td>{r.text}</td>
+                        <td>{r.sentiment.label}</td>
+                    </tr>
+                ))}
+
+            </tbody>
+        </table>
+    ):([]);
+
+    return (
+        <LoadingDataView nodata={_.isNil(replies)}>
+            {table}
+        </LoadingDataView>
+    );
+}
 
 export async function getServerSideProps({ params }) {
     //const postData = getPostData(params.id)
@@ -30,9 +71,11 @@ export default class Post extends Component {
         if(this.props.postData) {
             this.state = {
                 id: this.props.postData.id,
-                content: null,
+                platform: null,
                 source: null,
-                ner: null
+                ner: null,
+                sentiment: null,
+                replies: null
             }
         }
     }
@@ -43,13 +86,22 @@ export default class Post extends Component {
 
         if(this.state.id){
            console.log(postData);
+            fetch(`/api/getreplies/${postData.id}`)
+                .then(r=>r.json())
+                .then(j=>this.setState({replies: j}));
            let m_data = await fetch(`/api/getpost/${postData['id']}`);
            m_data = await m_data.json();
            this.setState(m_data);
             // Get NER
-            fetch('/api/ner', { method: 'POST', body: m_data.content })
+            fetch('/api/ner', { method: 'POST', body: m_data.source })
                 .then(r=>r.json())
                 .then(j=>this.setState({ner: j.ent}));
+            fetch('/api/sentiment', { method: 'POST', body: m_data.source })
+                .then(r=>r.json())
+                .then(j=>this.setState({sentiment: j}));
+
+
+
         }
 
 
@@ -64,26 +116,58 @@ export default class Post extends Component {
             <Layout>
                 <article className="uk-article">
 
-                    <p className="uk-text-lead">{this.state['content']}</p>
+                    <p className="uk-text-lead">{this.state['source']}</p>
 
                     <div>
                         <div className='uk-column-span'>
-                            Source: {this.state['source']}
+                            Source: {this.state['platform']}
                         </div>
                         <div className='uk-column-span'>
                             Sentiment:
                         </div>
+                            <LoadingDataView nodata={_.isNil(this.state.sentiment)}>
+                                {
+                                    <table className="uk-table uk-table-hover uk-table-divider">
+                                        <thead>
+                                        <tr>
+                                            <th></th>
+                                            {_.isNil(this.state.sentiment)?'':Object.keys(this.state.sentiment).map(m=>(
+                                                <th>{m}</th>
+                                            ))}
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>Label</td>
+                                            {_.isNil(this.state.sentiment)?'':Object.values(this.state.sentiment).map(m=>(
+                                                <th>{m.label}</th>
+                                            ))}
+                                        </tr>
+                                        <tr>
+                                            <td>Score</td>
+                                            {_.isNil(this.state.sentiment)?'':Object.values(this.state.sentiment).map(m=>(
+                                                <th>{m.score}</th>
+                                            ))}
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                }
+                            </LoadingDataView>
                         <div className='uk-column-span'>
                             Polarity:
                         </div>
                         <div className='uk-column-span'>
                             Entities:
                         </div>
-                        {_.isNil(this.state.ner)?(
-                            <div uk-spinner=''></div>
-                        ):(
+                        <LoadingDataView nodata={_.isNil(this.state.ner)} >
                             <div className='uk-column-span' dangerouslySetInnerHTML={{__html: this.state.ner}} />
-                        )}
+                        </LoadingDataView>
+
+                        <div className='uk-column-span'>
+                            Replies:
+                        </div>
+                        <RepliesView replies={this.state.replies} />
 
                         <div className='uk-column-span'>
                             Similar:
@@ -102,11 +186,5 @@ export default class Post extends Component {
 
 
 
-// export async function getStaticPaths(){
-//     const paths = [] //getAllPostIds()
-//     return {
-//         paths,
-//         fallback: true
-//     }
-// }
+
 
