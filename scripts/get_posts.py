@@ -3,7 +3,12 @@ import json
 import os
 # from tqdm import tqdm
 
-if __name__ == "__main__":
+
+def get_data_cache():
+    pass
+
+
+def get_data():
     train_frame = pd.DataFrame(columns=['id', 'cat', 'source', 'status', 'platform'])
     train_array = []
 
@@ -45,5 +50,9 @@ if __name__ == "__main__":
             except Exception as e:
                 print(e)
                 pass
+    return train_array, train_frame
 
+
+if __name__ == "__main__":
+    train_array, train_frame = get_data()
     print(json.dumps(train_array))

@@ -37,7 +37,11 @@ function RepliesView({replies}){
                 {replies.map(r=>(
                     <tr>
                         <td>{r.text}</td>
-                        <td>{r.sentiment.label}</td>
+                        <td>{r.sentiment.label=='POSITIVE'?(
+                            <span className="uk-label uk-label-success">{r.sentiment.label}</span>
+                        ):(
+                            <span className="uk-label uk-label-danger">{r.sentiment.label}</span>
+                        )}</td>
                     </tr>
                 ))}
 
@@ -47,6 +51,32 @@ function RepliesView({replies}){
 
     return (
         <LoadingDataView nodata={_.isNil(replies)}>
+            {table}
+        </LoadingDataView>
+    );
+}
+
+function EmotionView({emotion}){
+    const table = !_.isNil(emotion)?(
+        <table className="uk-table uk-table-hover uk-table-divider">
+            <thead>
+            <tr>
+                {Object.keys(emotion).map(m=>(
+                    <th>{m}</th>
+                ))}
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {Object.values(emotion).map(v=>(
+                        <td>{v}</td>
+                    ))}
+                </tr>
+            </tbody>
+        </table>
+    ):([]);
+    return (
+        <LoadingDataView nodata={_.isNil(emotion)}>
             {table}
         </LoadingDataView>
     );
@@ -75,7 +105,8 @@ export default class Post extends Component {
                 source: null,
                 ner: null,
                 sentiment: null,
-                replies: null
+                replies: null,
+                emotion: null
             }
         }
     }
@@ -99,6 +130,9 @@ export default class Post extends Component {
             fetch('/api/sentiment', { method: 'POST', body: m_data.source })
                 .then(r=>r.json())
                 .then(j=>this.setState({sentiment: j}));
+            fetch('/api/emotion', { method: 'POST', body: m_data.source })
+                .then(r=>r.json())
+                .then(j=>this.setState({emotion: j}));
 
 
 
@@ -122,7 +156,7 @@ export default class Post extends Component {
                         <div className='uk-column-span'>
                             Source: {this.state['platform']}
                         </div>
-                        <div className='uk-column-span'>
+                        <div className='uk-column-span uk-text-large'>
                             Sentiment:
                         </div>
                             <LoadingDataView nodata={_.isNil(this.state.sentiment)}>
@@ -155,21 +189,22 @@ export default class Post extends Component {
                                 }
                             </LoadingDataView>
                         <div className='uk-column-span'>
-                            Polarity:
+                            Emotion:
                         </div>
-                        <div className='uk-column-span'>
+                        <EmotionView emotion={this.state.emotion} />
+                        <div className='uk-column-span uk-text-large'>
                             Entities:
                         </div>
                         <LoadingDataView nodata={_.isNil(this.state.ner)} >
                             <div className='uk-column-span' dangerouslySetInnerHTML={{__html: this.state.ner}} />
                         </LoadingDataView>
 
-                        <div className='uk-column-span'>
+                        <div className='uk-column-span uk-text-large'>
                             Replies:
                         </div>
                         <RepliesView replies={this.state.replies} />
 
-                        <div className='uk-column-span'>
+                        <div className='uk-column-span uk-text-large'>
                             Similar:
                         </div>
 

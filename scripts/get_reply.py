@@ -1,11 +1,18 @@
 import json
 import sys, os
 from transformers import pipeline
+BASE_PATH = './datasets/rumoureval2019/rumoureval-2019-training-data'
+import pandas as pd
+from pandas import DataFrame
 
-if __name__ == "__main__":
-    m_id = sys.argv[1]
+CACHE = True
 
-    BASE_PATH = './datasets/rumoureval2019/rumoureval-2019-training-data'
+def get_replies_cache(post_id):
+    table:DataFrame = pd.read_pickle('reply_sentiments.pkl')
+    replies = table[table['pid'] == post_id]
+    return [{'text': x['reply'], 'sentiment': json.loads(x['emotion'])} for i, x in replies.iterrows()]
+
+def get_replies(post_id:str):
     with open(os.path.join(BASE_PATH, 'train-key.json')) as key_file:
         train_key = json.load(key_file)
 
@@ -20,7 +27,7 @@ if __name__ == "__main__":
     post_dirs = [os.path.join(x, y) for x in post_dirs for y in os.listdir(x)]
 
     # get dir matching the search
-    search_dir = [x for x in post_dirs if x.split('/')[-1] == m_id]
+    search_dir = [x for x in post_dirs if x.split('/')[-1] == post_id]
 
     search_dir = os.path.join(search_dir[0], 'replies')
     reply_files = [os.path.join(search_dir, x) for x in os.listdir(search_dir)]
@@ -29,19 +36,32 @@ if __name__ == "__main__":
     # Get the content of the replies
     for rl in reply_files:
         # read file
-        with open(rl, 'r') as rf:
-            reply_obj = json.load(rf)
+        try:
+            with open(rl, 'r') as rf:
+                reply_obj = json.load(rf)
 
-        if 'text' in reply_obj.keys():
-            replies.append(reply_obj['text'])
-        else:
-            replies.append(reply_obj['data']['body'])
- 
-    if len(replies) > 0:
-        s = pipeline('sentiment-analysis')
-        sents = s(replies)
-        replies = list(zip(replies, sents))
+            if 'text' in reply_obj.keys():
+                replies.append(reply_obj['text'])
+            else:
+                replies.append(reply_obj['data']['body'])
+        except Exception:
+            continue
 
-    replies = [{'text': x[0], 'sentiment': x[1]} for x in replies]
+    return replies
+
+
+if __name__ == "__main__":
+    m_id = sys.argv[1]
+
+    if CACHE:
+        replies = get_replies_cache(m_id)
+    else:
+        replies = get_replies(m_id)
+        if len(replies) > 0:
+            s = pipeline('sentiment-analysis')
+            sents = s(replies)
+            replies = list(zip(replies, sents))
+
+        replies = [{'text': x[0], 'sentiment': x[1]} for x in replies]
 
     print(json.dumps(replies))
