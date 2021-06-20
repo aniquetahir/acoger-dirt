@@ -40,6 +40,7 @@ function DeckTestPCL({onLoad}){
     const [viewState, updateViewState] = useState(INITIAL_VIEW_STATE);
     const [isLoaded, setIsLoaded] = useState(false);
     const [hoverInfo, setHoverInfo] = useState();
+    const [clickInfo, setClickInfo] = useState();
 
     useEffect(
         () => {
@@ -89,8 +90,8 @@ function DeckTestPCL({onLoad}){
             pointSize: 0.5,
             pickable: true,
             loaders: [LASWorkerLoader],
-            onHover: info => setHoverInfo(info),
-            onClick: info => console.log(info)
+            onHover: info => {setHoverInfo(info)},
+            onClick: info => {console.log(info); setClickInfo(info);}
         })
     ];
 
@@ -100,10 +101,23 @@ function DeckTestPCL({onLoad}){
                 controller={true}
                 onViewStateChange={v => updateViewState(v.viewState)}
                 layers={layers}
+                onClick={()=>setHoverInfo(null)}
                 parameters = {{
                     clearColor: [0.93, 0.86, 0.81, 1]
                 }}
+
         >
+            {
+                hoverInfo && hoverInfo.index!=-1 && (
+                    <div>
+                        <div  style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}
+                              class="uk-card uk-card-default uk-card-small uk-card-body">
+                            <h3 class="uk-card-title">Node</h3>
+                            <p>Index: {hoverInfo.index}</p>
+                        </div>
+                    </div>
+                )
+            }
             {/*{hoverInfo.object && (*/}
             {/*    <div style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: hoverInfo.x, top: hoverInfo.y}}>*/}
             {/*        hello*/}
@@ -146,7 +160,10 @@ export default function Home({allPostsData}) {
         <Head>
           <title>{siteTitle}</title>
         </Head>
-          <DeckTestPCL onLoad={true} />
+          <div onContextMenu={event => event.preventDefault()}>
+              <DeckTestPCL onLoad={true} />
+          </div>
+
           {/* <PostDisplay posts={useSWR('api/posts_sample', fetcher, {refreshInterval: 10000})} /> */}
         {/*<section className={utilStyles.headingMd}>*/}
         {/*  <p>[Your Self Introduction]</p>*/}
