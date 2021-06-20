@@ -8,8 +8,13 @@
     "start": "next start -p 4500"
   },
   "dependencies": {
+    "@loaders.gl/core": "^2.3.13",
+    "@loaders.gl/gltf": "^2.3.13",
+    "@loaders.gl/las": "^2.3.13",
+    "deck.gl": "^8.4.17",
     "gray-matter": "^4.0.2",
     "html-entities": "^1.4.0",
+    "loaders.gl": "^0.3.5",
     "lodash": "^4.17.20",
     "next": "^10.0.0",
     "react": "16.13.1",
